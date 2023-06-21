@@ -1,0 +1,41 @@
+1 2 GfsSimulation GfsBox GfsGEdge {} {
+  Time { end = 1000 dtmax=.5}
+  #PhysicalParams {L=100}
+  Refine 6
+#x*x + y*y - 0.3989423*0.3989423
+#  GfsSolid (x*x + y*y - 0.3989423*0.3989423 )
+  GfsSolid shape.gts 
+#{rz = -INCIDENCE} 
+  #AdaptVorticity {istep =1 } { maxlevel = 6 cmax = 1e-2 }
+  
+  SourceDiffusion {} U 1e-6
+  SourceDiffusion {} V 1e-6
+
+  EventStop {istep = 10} U 1e-4 DU
+  OutputScalarNorm {istep = 10} du {v = DU} 
+  OutputPPM {istep=20} { convert -colors 256 ppm:- velocity.png} {
+    v=Velocity
+  }
+  OutputPPM  {start = end} { convert -colors 256 ppm:- vorticity.png} {
+    v=Vorticity
+  }
+  GfsOutputSimulation{start=end} vorticity.vtk{
+   format=VTK
+  }
+  OutputLocation { start = end } xprof xprofile
+
+  OutputSimulation { start = end } end.gfs
+
+  GfsInit {} {
+     U = 0
+  }
+#  InitFraction {} T (y) {ty = 0.5}
+  GfsOutputTime            {istep = 50} stderr
+#GfsOutputBalance {istep =50} stderr
+# GfsOutputProjectionStats {istep = 10} stderr
+  Source {} U 0.000001
+}
+GfsBox {
+  }
+1 1 right
+1 1 top
